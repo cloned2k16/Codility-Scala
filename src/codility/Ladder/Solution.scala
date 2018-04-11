@@ -1,20 +1,25 @@
 object Solution {
     object static {
-        var fib: Array[Int] = new Array[Int](65536); // just in case (will be filled up just once anyway
-        val empty = Array[Int]();
-        
-        fib(0)=0;
-        fib(1)=1;
-        
-        for (i <- 2 to fib.length-1){
-            fib(i) = ((fib(i-2).asInstanceOf[Long]+fib(i-1).asInstanceOf[Long]) % (1<<31)).asInstanceOf[Int];
-            if (fib(i) < 0) println("ERROR at: "+i);
-            
+      val cacheSz = 50000;
+      val empty   = Array[Int]();
+      var fibCache:    Array[Int] = new Array[Int](cacheSz);
+
+      def fib (n:Int) :Int = { // let's add resiliency ..
+        if (n<cacheSz) return fibCache(n);
+        else { // not in cache!
+          return ( ( fib(n-1).asInstanceOf[Long] + fib(n-2).asInstanceOf[Long] ) % ((1<<31).asInstanceOf[Long])).asInstanceOf[Int]; 
         }
-        
-        //println("fib10: "+fib(10)); // 55
-    }
-    
+      }
+      
+      
+      fibCache(0)=0;
+      fibCache(1)=1;
+      
+      for (i <- 2 to fibCache.length-1) {
+        fibCache(i)  =   ( (fibCache(i-2).asInstanceOf[Long] + fibCache(i-1).asInstanceOf[Long]) % ((1<<31).asInstanceOf[Long])).asInstanceOf[Int];    
+      }        
+    }    
+	
     def solution(a: Array[Int], b: Array[Int]): Array[Int] = {
         val len=a.length;
         if (len!= b.length) return static.empty; // better safe than sorry!!
